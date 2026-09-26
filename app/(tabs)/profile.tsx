@@ -1,4 +1,4 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { DateTimeField } from '../../src/components/DateTimeField';
 import { requestNotificationPermission } from '../../src/notifications';
 import { useStore } from '../../src/store/useStore';
 import { colors } from '../../src/theme';
@@ -30,12 +31,12 @@ const REMINDER_OPTIONS = [
 ];
 
 export default function Profile() {
+  const tabBarHeight = useBottomTabBarHeight();
   const profile = useStore((s) => s.profile);
   const setProfile = useStore((s) => s.setProfile);
   const resetAllData = useStore((s) => s.resetAllData);
   const [name, setName] = useState(profile.name);
   const [course, setCourse] = useState(profile.course);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   function deleteLocalPhotoFile(uri: string | undefined) {
     if (!uri || !uri.startsWith('file://') || !uri.startsWith(Paths.document.uri)) return;
@@ -141,7 +142,10 @@ export default function Profile() {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + 24 }]}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={styles.title}>Perfil</Text>
 
           <Pressable
@@ -208,32 +212,23 @@ export default function Profile() {
           </View>
 
           {profile.nightBeforeEnabled && profile.notificationsEnabled && (
-            <Pressable
+            <DateTimeField
+              mode="time"
+              value={combineDateAndTime(todayISO(), profile.nightBeforeTime)}
+              is24Hour
               style={styles.timeRow}
-              onPress={() => setShowTimePicker(true)}
-              accessibilityRole="button"
               accessibilityLabel={`Horário do lembrete: ${profile.nightBeforeTime}`}
+              webLabel={<Text style={styles.rowLabel}>Horário do lembrete</Text>}
+              onChange={(selected) => {
+                const hh = String(selected.getHours()).padStart(2, '0');
+                const mm = String(selected.getMinutes()).padStart(2, '0');
+                const time = `${hh}:${mm}`;
+                if (isValidTime(time)) setProfile({ nightBeforeTime: time });
+              }}
             >
               <Text style={styles.rowLabel}>Horário do lembrete</Text>
               <Text style={styles.timeValue}>{profile.nightBeforeTime}</Text>
-            </Pressable>
-          )}
-
-          {showTimePicker && (
-            <DateTimePicker
-              value={combineDateAndTime(todayISO(), profile.nightBeforeTime)}
-              mode="time"
-              is24Hour
-              onChange={(event, selected) => {
-                setShowTimePicker(Platform.OS === 'ios');
-                if (event.type === 'set' && selected) {
-                  const hh = String(selected.getHours()).padStart(2, '0');
-                  const mm = String(selected.getMinutes()).padStart(2, '0');
-                  const time = `${hh}:${mm}`;
-                  if (isValidTime(time)) setProfile({ nightBeforeTime: time });
-                }
-              }}
-            />
+            </DateTimeField>
           )}
 
           <Text style={[styles.rowLabel, styles.optionsLabel]}>Lembrete no dia da atividade</Text>
@@ -275,7 +270,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
-  content: { padding: 16, paddingBottom: 60 },
+  content: { padding: 16 },
   title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 16 },
   avatarWrap: { alignItems: 'center', marginBottom: 20, gap: 6 },
   avatar: { width: 88, height: 88, borderRadius: 44 },

@@ -1,4 +1,3 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import {
@@ -12,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { ColorPicker } from '../../src/components/ColorPicker';
+import { DateTimeField } from '../../src/components/DateTimeField';
 import { EmptyState } from '../../src/components/EmptyState';
 import { useStore } from '../../src/store/useStore';
 import { colors, locationPalette } from '../../src/theme';
@@ -44,8 +44,6 @@ export default function ModuleForm() {
   const [color, setColor] = useState(
     existing?.color ?? locationPalette[modules.length % locationPalette.length]
   );
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useLayoutEffect(() => {
@@ -133,49 +131,31 @@ export default function ModuleForm() {
         />
 
         <Text style={styles.label}>Início</Text>
-        <Pressable
+        <DateTimeField
+          mode="date"
+          value={combineDateAndTime(startDate)}
           style={styles.input}
-          onPress={() => setShowStartPicker(true)}
-          accessibilityRole="button"
           accessibilityLabel={`Data de início: ${formatDateFullPt(startDate)}`}
+          onChange={(selected) => {
+            const newStart = toISODate(selected);
+            setStartDate(newStart);
+            if (newStart > endDate) setEndDate(newStart);
+          }}
         >
           <Text style={styles.inputText}>{formatDateFullPt(startDate)}</Text>
-        </Pressable>
-        {showStartPicker && (
-          <DateTimePicker
-            value={combineDateAndTime(startDate)}
-            mode="date"
-            onChange={(event, selected) => {
-              setShowStartPicker(Platform.OS === 'ios');
-              if (event.type === 'set' && selected) {
-                const newStart = toISODate(selected);
-                setStartDate(newStart);
-                if (newStart > endDate) setEndDate(newStart);
-              }
-            }}
-          />
-        )}
+        </DateTimeField>
 
         <Text style={styles.label}>Fim</Text>
-        <Pressable
+        <DateTimeField
+          mode="date"
+          value={combineDateAndTime(endDate)}
+          minimumDate={combineDateAndTime(startDate)}
           style={styles.input}
-          onPress={() => setShowEndPicker(true)}
-          accessibilityRole="button"
           accessibilityLabel={`Data de fim: ${formatDateFullPt(endDate)}`}
+          onChange={(selected) => setEndDate(toISODate(selected))}
         >
           <Text style={styles.inputText}>{formatDateFullPt(endDate)}</Text>
-        </Pressable>
-        {showEndPicker && (
-          <DateTimePicker
-            value={combineDateAndTime(endDate)}
-            mode="date"
-            minimumDate={combineDateAndTime(startDate)}
-            onChange={(event, selected) => {
-              setShowEndPicker(Platform.OS === 'ios');
-              if (event.type === 'set' && selected) setEndDate(toISODate(selected));
-            }}
-          />
-        )}
+        </DateTimeField>
 
         <Text style={styles.label}>Cor</Text>
         <ColorPicker value={color} onChange={setColor} />

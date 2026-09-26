@@ -1,4 +1,3 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
 import {
@@ -11,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { DateTimeField } from '../../src/components/DateTimeField';
 import { EmptyState } from '../../src/components/EmptyState';
 import { describeReminderPlan } from '../../src/notifications';
 import { useStore } from '../../src/store/useStore';
@@ -56,11 +56,6 @@ export default function EntryForm() {
   const [moduleId, setModuleId] = useState(existing?.moduleId ?? validParamModuleId);
   const [notes, setNotes] = useState(existing?.notes ?? '');
   const [saving, setSaving] = useState(false);
-
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: isNew ? 'Nova atividade' : 'Editar atividade' });
@@ -202,133 +197,99 @@ export default function EntryForm() {
         <View style={styles.timeRowWrap}>
           <View style={styles.timeCol}>
             <Text style={styles.label}>Data de início</Text>
-            <Pressable
+            <DateTimeField
+              mode="date"
+              value={combineDateAndTime(startDate)}
               style={styles.input}
-              onPress={() => setShowStartDatePicker(true)}
-              accessibilityRole="button"
               accessibilityLabel={`Data de início: ${formatDateFullPt(startDate)}`}
+              onChange={(selected) => {
+                const newStart = toISODate(selected);
+                setStartDate(newStart);
+                if (compareISODate(endDate, newStart) < 0) setEndDate(newStart);
+              }}
             >
               <Text style={styles.inputText}>{formatDateFullPt(startDate)}</Text>
-            </Pressable>
-            {showStartDatePicker && (
-              <DateTimePicker
-                value={combineDateAndTime(startDate)}
-                mode="date"
-                onChange={(event, selected) => {
-                  setShowStartDatePicker(Platform.OS === 'ios');
-                  if (event.type === 'set' && selected) {
-                    const newStart = toISODate(selected);
-                    setStartDate(newStart);
-                    if (compareISODate(endDate, newStart) < 0) setEndDate(newStart);
-                  }
-                }}
-              />
-            )}
+            </DateTimeField>
           </View>
           <View style={styles.timeCol}>
             <Text style={styles.label}>Data de fim</Text>
-            <Pressable
+            <DateTimeField
+              mode="date"
+              value={combineDateAndTime(endDate)}
+              minimumDate={combineDateAndTime(startDate)}
               style={styles.input}
-              onPress={() => setShowEndDatePicker(true)}
-              accessibilityRole="button"
               accessibilityLabel={`Data de fim: ${formatDateFullPt(endDate)}`}
+              onChange={(selected) => setEndDate(toISODate(selected))}
             >
               <Text style={styles.inputText}>{formatDateFullPt(endDate)}</Text>
-            </Pressable>
-            {showEndDatePicker && (
-              <DateTimePicker
-                value={combineDateAndTime(endDate)}
-                mode="date"
-                minimumDate={combineDateAndTime(startDate)}
-                onChange={(event, selected) => {
-                  setShowEndDatePicker(Platform.OS === 'ios');
-                  if (event.type === 'set' && selected) setEndDate(toISODate(selected));
-                }}
-              />
-            )}
+            </DateTimeField>
           </View>
         </View>
 
         <View style={styles.timeRowWrap}>
           <View style={styles.timeCol}>
             <Text style={styles.label}>Início</Text>
-            <View style={styles.timeInputRow}>
-              <Pressable
-                style={[styles.input, styles.timeInputMain]}
-                onPress={() => setShowStartPicker(true)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  startTime ? `Horário de início: ${startTime}` : 'Definir horário de início'
-                }
-              >
-                <Text style={styles.inputText}>{startTime ?? 'Definir'}</Text>
-              </Pressable>
-              {startTime && (
-                <Pressable
-                  style={styles.clearButton}
-                  onPress={() => setStartTime(undefined)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Limpar horário de início"
-                >
-                  <Text style={styles.clearButtonText}>×</Text>
-                </Pressable>
-              )}
-            </View>
-            {showStartPicker && (
-              <DateTimePicker
-                value={combineDateAndTime(startDate, startTime ?? '08:00')}
-                mode="time"
-                is24Hour
-                onChange={(event, selected) => {
-                  setShowStartPicker(Platform.OS === 'ios');
-                  if (event.type === 'set' && selected) {
-                    setStartTime(
-                      `${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`
-                    );
-                  }
-                }}
-              />
-            )}
+            <DateTimeField
+              mode="time"
+              value={combineDateAndTime(startDate, startTime ?? '08:00')}
+              is24Hour
+              empty={!startTime}
+              style={styles.input}
+              containerStyle={styles.timeInputRow}
+              accessibilityLabel={
+                startTime ? `Horário de início: ${startTime}` : 'Definir horário de início'
+              }
+              onChange={(selected) => {
+                setStartTime(
+                  `${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`
+                );
+              }}
+              trailing={
+                startTime && (
+                  <Pressable
+                    style={styles.clearButton}
+                    onPress={() => setStartTime(undefined)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Limpar horário de início"
+                  >
+                    <Text style={styles.clearButtonText}>×</Text>
+                  </Pressable>
+                )
+              }
+            >
+              <Text style={styles.inputText}>{startTime ?? 'Definir'}</Text>
+            </DateTimeField>
           </View>
           <View style={styles.timeCol}>
             <Text style={styles.label}>Fim</Text>
-            <View style={styles.timeInputRow}>
-              <Pressable
-                style={[styles.input, styles.timeInputMain]}
-                onPress={() => setShowEndPicker(true)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  endTime ? `Horário de fim: ${endTime}` : 'Definir horário de fim'
-                }
-              >
-                <Text style={styles.inputText}>{endTime ?? 'Definir'}</Text>
-              </Pressable>
-              {endTime && (
-                <Pressable
-                  style={styles.clearButton}
-                  onPress={() => setEndTime(undefined)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Limpar horário de fim"
-                >
-                  <Text style={styles.clearButtonText}>×</Text>
-                </Pressable>
-              )}
-            </View>
-            {showEndPicker && (
-              <DateTimePicker
-                value={combineDateAndTime(startDate, endTime ?? startTime ?? '09:00')}
-                mode="time"
-                is24Hour
-                onChange={(event, selected) => {
-                  setShowEndPicker(Platform.OS === 'ios');
-                  if (event.type === 'set' && selected) {
-                    setEndTime(
-                      `${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`
-                    );
-                  }
-                }}
-              />
-            )}
+            <DateTimeField
+              mode="time"
+              value={combineDateAndTime(startDate, endTime ?? startTime ?? '09:00')}
+              is24Hour
+              empty={!endTime}
+              style={styles.input}
+              containerStyle={styles.timeInputRow}
+              accessibilityLabel={endTime ? `Horário de fim: ${endTime}` : 'Definir horário de fim'}
+              onChange={(selected) => {
+                setEndTime(
+                  `${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`
+                );
+              }}
+              trailing={
+                endTime && (
+                  <Pressable
+                    style={styles.clearButton}
+                    onPress={() => setEndTime(undefined)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Limpar horário de fim"
+                  >
+                    <Text style={styles.clearButtonText}>×</Text>
+                  </Pressable>
+                )
+              }
+            >
+              <Text style={styles.inputText}>{endTime ?? 'Definir'}</Text>
+            </DateTimeField>
           </View>
         </View>
 
@@ -463,7 +424,6 @@ const styles = StyleSheet.create({
   timeRowWrap: { flexDirection: 'row', gap: 12 },
   timeCol: { flex: 1 },
   timeInputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  timeInputMain: { flex: 1 },
   clearButton: {
     width: 36,
     height: 36,

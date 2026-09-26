@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -81,6 +82,7 @@ function ModuleSection({ module, entries }: { module: Module | null; entries: Sc
 }
 
 export default function Schedule() {
+  const tabBarHeight = useBottomTabBarHeight();
   const router = useRouter();
   const modules = useStore((s) => s.modules);
   const entries = useStore((s) => s.entries);
@@ -150,7 +152,7 @@ export default function Schedule() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + 24 }]}>
         {isEmpty ? (
           <EmptyState
             title="Seu cronograma está vazio"
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   moduleAddButtonText: { color: colors.primaryDark, fontWeight: '700', fontSize: 12 },
-  content: { padding: 16, paddingBottom: 100 },
+  content: { padding: 16 },
   moduleSection: { marginBottom: 20 },
   moduleHeader: { borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14, marginBottom: 10 },
   moduleHeaderText: { color: '#fff', fontWeight: '700', fontSize: 15 },

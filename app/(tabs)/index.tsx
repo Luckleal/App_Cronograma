@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -11,6 +12,7 @@ import { compareISODate, formatDateLongPt, todayISO, weekdayLong } from '../../s
 import { entriesForDate, isMultiDay, upcomingEntries } from '../../src/utils/schedule';
 
 export default function Home() {
+  const tabBarHeight = useBottomTabBarHeight();
   const router = useRouter();
   const profile = useStore((s) => s.profile);
   const entries = useStore((s) => s.entries);
@@ -36,7 +38,7 @@ export default function Home() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + 24 }]}>
         <Text style={styles.greeting}>Olá{profile.name ? `, ${profile.name}` : ''}</Text>
         <Text style={styles.date}>
           {weekdayLong(today)}, {formatDateLongPt(today)}
@@ -79,7 +81,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 16, paddingBottom: 100 },
+  content: { padding: 16 },
   greeting: { fontSize: 22, fontWeight: '700', color: colors.text },
   date: {
     fontSize: 14,

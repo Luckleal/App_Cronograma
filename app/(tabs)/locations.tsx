@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +8,7 @@ import { useStore } from '../../src/store/useStore';
 import { colors } from '../../src/theme';
 
 export default function Locations() {
+  const tabBarHeight = useBottomTabBarHeight();
   const router = useRouter();
   const locations = useStore((s) => s.locations);
   const entries = useStore((s) => s.entries);
@@ -17,7 +19,7 @@ export default function Locations() {
       <FlatList
         data={locations}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + 24 }]}
         ListEmptyComponent={
           <EmptyState
             title="Nenhum local cadastrado"
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 4,
   },
-  content: { padding: 16, paddingBottom: 100, flexGrow: 1 },
+  content: { padding: 16, flexGrow: 1 },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
