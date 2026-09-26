@@ -1,15 +1,19 @@
 {
   "expo": {
-    "name": "cronograma-app",
+    "name": "Meu Cronograma",
     "slug": "cronograma-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "cronograma",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.luckSoluCode.cronograma"
     },
     "android": {
+      "package": "com.luckSoluCode.cronograma",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -20,6 +24,25 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#101B33"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app usa suas fotos para definir a imagem do seu perfil."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
     }
   }
 }
