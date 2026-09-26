@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Maestri / Claude local
+.maestri/
+.claude/scheduled_tasks.lock
