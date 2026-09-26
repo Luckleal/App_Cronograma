@@ -26,8 +26,12 @@
   "devDependencies": {
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.10",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~10.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "jest": "~29.7.0",
     "jest-expo": "~54.0.18",
+    "prettier": "^3.9.9",
     "typescript": "~5.9.2"
   },
   "scripts": {
@@ -35,10 +39,30 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "expo lint",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "coverageThreshold": {
+      "./src/store/": {
+        "statements": 56,
+        "branches": 52,
+        "functions": 47,
+        "lines": 63
+      },
+      "./src/utils/": {
+        "statements": 75,
+        "branches": 74,
+        "functions": 67,
+        "lines": 77
+      }
+    }
   },
   "private": true
 }
