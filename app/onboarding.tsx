@@ -59,7 +59,7 @@ export default function Onboarding() {
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Ex: Yasmin"
+              placeholder="Ex: Maria"
               placeholderTextColor={colors.textMuted}
             />
             <Text style={styles.label}>Curso ou turma (opcional)</Text>

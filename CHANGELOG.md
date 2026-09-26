@@ -28,5 +28,9 @@ Todas as mudanças neste projeto são documentadas neste arquivo.
 
 ### Changed
 
+- Licença: todos os direitos reservados (substitui o MIT do template Expo)
+- Placeholder e testes sem nome de pessoa real
+- CI com actions v7 e Node 22
+
 - Formatação com Prettier e ordem de imports
 - Atualização de documentação do Expo para SDK 54

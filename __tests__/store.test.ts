@@ -263,7 +263,7 @@ it('migra perfil parcial mesclando padroes e preservando escolhas falsas e zero'
       version: 0,
       state: {
         onboarded: true,
-        profile: { name: 'Yasmin', notificationsEnabled: false, sameDayMinutesBefore: 0 },
+        profile: { name: 'Maria', notificationsEnabled: false, sameDayMinutesBefore: 0 },
         entries: [{ id: 'old', title: 'Legado', date: '2024-02-29' }],
       },
     })
@@ -273,7 +273,7 @@ it('migra perfil parcial mesclando padroes e preservando escolhas falsas e zero'
 
   expect(useStore.getState().profile).toEqual({
     ...profile,
-    name: 'Yasmin',
+    name: 'Maria',
     notificationsEnabled: false,
     sameDayMinutesBefore: 0,
   });
