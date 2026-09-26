@@ -32,18 +32,36 @@ export async function exportEntriesAsCsv(
     return;
   }
 
+  // Sweep stale exports before writing the new one. shareAsync resolves once
+  // the OS share sheet accepts the file, not once the receiving app (e.g.
+  // WhatsApp/Gmail opening it in another task on Android) finishes reading
+  // it — so a successful share must not delete the file right away.
+  try {
+    for (const cached of Paths.cache.list()) {
+      if (cached.name.startsWith('cronograma-') && cached.name.endsWith('.csv')) {
+        cached.delete();
+      }
+    }
+  } catch {
+    // best-effort cleanup; a stale file left behind isn't fatal
+  }
+
   const file = new File(Paths.cache, fileName);
-  if (file.exists) file.delete();
-  file.create();
+  file.create({ overwrite: true });
   file.write(csv);
 
-  const canShare = await Sharing.isAvailableAsync();
-  if (!canShare) {
-    throw new Error('O compartilhamento de arquivos não está disponível neste dispositivo.');
+  try {
+    const canShare = await Sharing.isAvailableAsync();
+    if (!canShare) {
+      throw new Error('O compartilhamento de arquivos não está disponível neste dispositivo.');
+    }
+    await Sharing.shareAsync(file.uri, {
+      mimeType: 'text/csv',
+      dialogTitle: 'Exportar cronograma',
+      UTI: 'public.comma-separated-values-text',
+    });
+  } catch (err) {
+    if (file.exists) file.delete();
+    throw err;
   }
-  await Sharing.shareAsync(file.uri, {
-    mimeType: 'text/csv',
-    dialogTitle: 'Exportar cronograma',
-    UTI: 'public.comma-separated-values-text',
-  });
 }

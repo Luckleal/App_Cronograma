@@ -31,10 +31,15 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env*
+!.env.example
 
 # typescript
 *.tsbuildinfo
+
+# test coverage
+coverage/
 
 # generated native folders
 /ios
@@ -43,3 +48,4 @@ yarn-error.*
 # Maestri / Claude local
 .maestri/
 .claude/scheduled_tasks.lock
+.claude/launch.json

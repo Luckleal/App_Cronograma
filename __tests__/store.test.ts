@@ -11,6 +11,11 @@ jest.mock('@react-native-async-storage/async-storage', () => {
   };
 });
 
+jest.mock('expo-file-system', () => ({
+  Paths: { document: { uri: 'file:///app/documents/' } },
+  File: jest.fn(() => ({ delete: jest.fn() })),
+}));
+
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),
   scheduleNotificationAsync: jest.fn(),
@@ -21,6 +26,7 @@ jest.mock('expo-notifications', () => ({
 }));
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { File, Paths } from 'expo-file-system';
 import * as Notifications from 'expo-notifications';
 import { useStore } from '../src/store/useStore';
 import { Profile, ScheduleEntry } from '../src/types';
@@ -56,6 +62,38 @@ beforeEach(async () => {
 });
 
 afterEach(() => jest.restoreAllMocks());
+
+it('resetAllData apaga a foto em Paths.document e remove a URI persistida', async () => {
+  const photoUri = `${Paths.document.uri}profile.jpg`;
+  useStore.setState({ profile: { ...profile, photoUri }, onboarded: true });
+
+  await useStore.getState().resetAllData();
+
+  expect(File).toHaveBeenCalledTimes(1);
+  expect(File).toHaveBeenCalledWith(photoUri);
+  const photo = jest.mocked(File).mock.results[0].value;
+  expect(photo.delete).toHaveBeenCalledTimes(1);
+  expect(useStore.getState().profile).toEqual(profile);
+  expect(useStore.getState().onboarded).toBe(false);
+  const persisted = JSON.parse((await AsyncStorage.getItem('cronograma-storage'))!);
+  expect(persisted.state.profile).toEqual(profile);
+});
+
+it.each([
+  'https://example.com/profile.jpg',
+  'data:image/jpeg;base64,YWJj',
+  'content://media/external/images/123',
+  'file:///external/profile.jpg',
+  'file:///app/documents-other/profile.jpg',
+  undefined,
+])('resetAllData nao acessa arquivo para photoUri=%s', async (photoUri) => {
+  useStore.setState({ profile: { ...profile, photoUri } });
+
+  await useStore.getState().resetAllData();
+
+  expect(File).not.toHaveBeenCalled();
+  expect(useStore.getState().profile).toEqual(profile);
+});
 
 it('checkTimeZone nao reagenda nem grava quando o fuso do celular permanece igual', async () => {
   const options = Intl.DateTimeFormat().resolvedOptions();

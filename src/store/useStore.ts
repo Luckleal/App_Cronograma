@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { File, Paths } from 'expo-file-system';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { cancelEntryNotifications, scheduleEntryNotifications } from '../notifications';
@@ -212,12 +213,22 @@ export const useStore = create<State>()(
 
         resetAllData: () =>
           enqueue(async () => {
-            const { entries } = get();
+            const { entries, profile } = get();
             for (const entry of entries) {
               try {
                 await cancelEntryNotifications(entry);
               } catch (err) {
                 console.warn(`Falha ao cancelar notificações da atividade ${entry.id}`, err);
+              }
+            }
+            // Photo files live outside AsyncStorage (Paths.document), so clearing
+            // the profile field alone would leak the file on disk.
+            const photoUri = profile.photoUri;
+            if (photoUri && photoUri.startsWith('file://') && photoUri.startsWith(Paths.document.uri)) {
+              try {
+                new File(photoUri).delete();
+              } catch (err) {
+                console.warn('Falha ao remover foto do perfil durante o reset.', err);
               }
             }
             // Only clear the entries captured above (the ones just canceled) —
