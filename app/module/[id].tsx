@@ -1,12 +1,28 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { ColorPicker } from '../../src/components/ColorPicker';
 import { EmptyState } from '../../src/components/EmptyState';
 import { useStore } from '../../src/store/useStore';
 import { colors, locationPalette } from '../../src/theme';
-import { addDays, combineDateAndTime, formatDateFullPt, isValidISODate, toISODate, todayISO } from '../../src/utils/date';
+import {
+  addDays,
+  combineDateAndTime,
+  formatDateFullPt,
+  isValidISODate,
+  toISODate,
+  todayISO,
+} from '../../src/utils/date';
 import { confirmAsync, showAlert } from '../../src/utils/dialog';
 
 export default function ModuleForm() {
@@ -25,7 +41,9 @@ export default function ModuleForm() {
   const [name, setName] = useState(existing?.name ?? '');
   const [startDate, setStartDate] = useState(existing?.startDate ?? todayISO());
   const [endDate, setEndDate] = useState(existing?.endDate ?? addDays(todayISO(), 27));
-  const [color, setColor] = useState(existing?.color ?? locationPalette[modules.length % locationPalette.length]);
+  const [color, setColor] = useState(
+    existing?.color ?? locationPalette[modules.length % locationPalette.length]
+  );
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -59,7 +77,12 @@ export default function ModuleForm() {
       return;
     }
 
-    const payload = { name: name.trim(), startDate, endDate: endDate < startDate ? startDate : endDate, color };
+    const payload = {
+      name: name.trim(),
+      startDate,
+      endDate: endDate < startDate ? startDate : endDate,
+      color,
+    };
 
     if (!isNew) {
       setSaving(true);
@@ -95,7 +118,10 @@ export default function ModuleForm() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.safe}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.label}>Nome do módulo</Text>
         <TextInput
@@ -159,7 +185,9 @@ export default function ModuleForm() {
           disabled={!canSave || saving}
           onPress={handleSave}
         >
-          <Text style={styles.saveButtonText}>{isNew ? 'Adicionar módulo' : 'Salvar alterações'}</Text>
+          <Text style={styles.saveButtonText}>
+            {isNew ? 'Adicionar módulo' : 'Salvar alterações'}
+          </Text>
         </Pressable>
 
         {!isNew && (
@@ -186,12 +214,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   inputText: { fontSize: 15, color: colors.text },
-  saveButton: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 28 },
+  saveButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 28,
+  },
   saveButtonDisabled: { opacity: 0.5 },
   saveButtonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   deleteButton: { alignItems: 'center', paddingVertical: 14, marginTop: 4 },
   deleteButtonText: { color: colors.danger, fontWeight: '600' },
   notFoundWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 },
-  notFoundButton: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24 },
+  notFoundButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
   notFoundButtonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

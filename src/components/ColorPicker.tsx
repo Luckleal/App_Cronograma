@@ -1,7 +1,13 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { locationPalette } from '../theme';
 
-export function ColorPicker({ value, onChange }: { value: string; onChange: (color: string) => void }) {
+export function ColorPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string) => void;
+}) {
   return (
     <View style={styles.row}>
       {locationPalette.map((color) => (

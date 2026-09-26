@@ -41,7 +41,8 @@ let timeZoneCheckPending = false;
 
 const guardedStorage = {
   getItem: (name: string) => AsyncStorage.getItem(name),
-  setItem: (name: string, value: string) => (canPersist ? AsyncStorage.setItem(name, value) : Promise.resolve()),
+  setItem: (name: string, value: string) =>
+    canPersist ? AsyncStorage.setItem(name, value) : Promise.resolve(),
   removeItem: (name: string) => (canPersist ? AsyncStorage.removeItem(name) : Promise.resolve()),
 };
 
@@ -65,7 +66,9 @@ type State = {
   updateModule: (id: string, patch: Partial<Module>) => void;
   deleteModule: (id: string) => void;
 
-  addEntry: (entry: Omit<ScheduleEntry, 'id' | 'nightBeforeNotificationId' | 'sameDayNotificationId'>) => Promise<void>;
+  addEntry: (
+    entry: Omit<ScheduleEntry, 'id' | 'nightBeforeNotificationId' | 'sameDayNotificationId'>
+  ) => Promise<void>;
   updateEntry: (id: string, patch: Partial<ScheduleEntry>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
 
@@ -105,7 +108,9 @@ export const useStore = create<State>()(
           console.warn(`Falha ao agendar notificações da atividade ${id}`, err);
           set((s) => ({
             entries: s.entries.map((e) =>
-              e.id === id ? { ...e, nightBeforeNotificationId: undefined, sameDayNotificationId: undefined } : e
+              e.id === id
+                ? { ...e, nightBeforeNotificationId: undefined, sameDayNotificationId: undefined }
+                : e
             ),
           }));
         }
@@ -123,8 +128,15 @@ export const useStore = create<State>()(
         completeOnboarding: () => set({ onboarded: true }),
 
         setProfile: async (patch) => {
-          const notificationRelevant = ['notificationsEnabled', 'nightBeforeEnabled', 'nightBeforeTime', 'sameDayMinutesBefore'];
-          const touchesNotifications = Object.keys(patch).some((k) => notificationRelevant.includes(k));
+          const notificationRelevant = [
+            'notificationsEnabled',
+            'nightBeforeEnabled',
+            'nightBeforeTime',
+            'sameDayMinutesBefore',
+          ];
+          const touchesNotifications = Object.keys(patch).some((k) =>
+            notificationRelevant.includes(k)
+          );
           set((s) => ({ profile: { ...s.profile, ...patch } }));
           if (touchesNotifications) {
             await get().rescheduleAllNotifications();
@@ -137,20 +149,28 @@ export const useStore = create<State>()(
           return newLocation;
         },
         updateLocation: async (id, patch) => {
-          set((s) => ({ locations: s.locations.map((l) => (l.id === id ? { ...l, ...patch } : l)) }));
+          set((s) => ({
+            locations: s.locations.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+          }));
           // The location's name/address is embedded in already-scheduled notification
           // text, so linked entries need their reminders rebuilt.
-          const affected = get().entries.filter((e) => e.locationId === id).map((e) => e.id);
+          const affected = get()
+            .entries.filter((e) => e.locationId === id)
+            .map((e) => e.id);
           if (affected.length === 0) return;
           await enqueue(async () => {
             for (const entryId of affected) await scheduleForEntry(entryId);
           });
         },
         deleteLocation: async (id) => {
-          const affected = get().entries.filter((e) => e.locationId === id).map((e) => e.id);
+          const affected = get()
+            .entries.filter((e) => e.locationId === id)
+            .map((e) => e.id);
           set((s) => ({
             locations: s.locations.filter((l) => l.id !== id),
-            entries: s.entries.map((e) => (e.locationId === id ? { ...e, locationId: undefined } : e)),
+            entries: s.entries.map((e) =>
+              e.locationId === id ? { ...e, locationId: undefined } : e
+            ),
           }));
           if (affected.length === 0) return;
           await enqueue(async () => {
@@ -224,7 +244,11 @@ export const useStore = create<State>()(
             // Photo files live outside AsyncStorage (Paths.document), so clearing
             // the profile field alone would leak the file on disk.
             const photoUri = profile.photoUri;
-            if (photoUri && photoUri.startsWith('file://') && photoUri.startsWith(Paths.document.uri)) {
+            if (
+              photoUri &&
+              photoUri.startsWith('file://') &&
+              photoUri.startsWith(Paths.document.uri)
+            ) {
               try {
                 new File(photoUri).delete();
               } catch (err) {
@@ -264,7 +288,7 @@ export const useStore = create<State>()(
       migrate: (persistedState) => {
         const state = (persistedState ?? {}) as {
           profile?: Partial<Profile>;
-          entries?: Array<Record<string, unknown>>;
+          entries?: Record<string, unknown>[];
           [key: string]: unknown;
         };
 
@@ -273,7 +297,11 @@ export const useStore = create<State>()(
         const rawEntries = state.entries ?? [];
         const entries = rawEntries
           .map((entry) => {
-            const { date, ...rest } = entry as { date?: string; startDate?: string; endDate?: string };
+            const { date, ...rest } = entry as {
+              date?: string;
+              startDate?: string;
+              endDate?: string;
+            };
             let startDate = typeof rest.startDate === 'string' ? rest.startDate : date;
             let endDate = typeof rest.endDate === 'string' ? rest.endDate : date;
             if (!startDate && endDate) startDate = endDate;

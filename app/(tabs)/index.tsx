@@ -30,7 +30,9 @@ export default function Home() {
   }, []);
 
   const todayEntries = entriesForDate(entries, today);
-  const nextEntries = upcomingEntries(entries, 6).filter((e) => compareISODate(e.startDate, today) > 0);
+  const nextEntries = upcomingEntries(entries, 6).filter(
+    (e) => compareISODate(e.startDate, today) > 0
+  );
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -42,14 +44,20 @@ export default function Home() {
 
         <Text style={styles.sectionTitle}>Hoje</Text>
         {todayEntries.length === 0 ? (
-          <EmptyState title="Nenhuma atividade hoje" subtitle="Aproveite para descansar ou revisar seu conteúdo." />
+          <EmptyState
+            title="Nenhuma atividade hoje"
+            subtitle="Aproveite para descansar ou revisar seu conteúdo."
+          />
         ) : (
           todayEntries.map((entry) => <EntryCard key={entry.id} entry={entry} highlight />)
         )}
 
         <Text style={styles.sectionTitle}>Próximos dias</Text>
         {nextEntries.length === 0 ? (
-          <EmptyState title="Nada agendado ainda" subtitle="Toque no + para adicionar sua próxima atividade." />
+          <EmptyState
+            title="Nada agendado ainda"
+            subtitle="Toque no + para adicionar sua próxima atividade."
+          />
         ) : (
           nextEntries.map((entry) => (
             <View key={entry.id} style={styles.upcomingRow}>
@@ -62,7 +70,9 @@ export default function Home() {
           ))
         )}
       </ScrollView>
-      <Fab onPress={() => router.push({ pathname: '/entry/[id]', params: { id: 'new', date: today } })} />
+      <Fab
+        onPress={() => router.push({ pathname: '/entry/[id]', params: { id: 'new', date: today } })}
+      />
     </SafeAreaView>
   );
 }
@@ -71,8 +81,26 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: 16, paddingBottom: 100 },
   greeting: { fontSize: 22, fontWeight: '700', color: colors.text },
-  date: { fontSize: 14, color: colors.textMuted, marginTop: 2, marginBottom: 20, textTransform: 'capitalize' },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginBottom: 10, marginTop: 8 },
+  date: {
+    fontSize: 14,
+    color: colors.textMuted,
+    marginTop: 2,
+    marginBottom: 20,
+    textTransform: 'capitalize',
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 10,
+    marginTop: 8,
+  },
   upcomingRow: { marginBottom: 4 },
-  upcomingDate: { fontSize: 12, fontWeight: '600', color: colors.textMuted, marginBottom: 4, textTransform: 'capitalize' },
+  upcomingDate: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginBottom: 4,
+    textTransform: 'capitalize',
+  },
 });

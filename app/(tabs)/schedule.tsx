@@ -8,7 +8,13 @@ import { Fab } from '../../src/components/Fab';
 import { useStore } from '../../src/store/useStore';
 import { colors } from '../../src/theme';
 import { Module, ScheduleEntry } from '../../src/types';
-import { formatDatePt, isTodayISO, parseISODate, startOfWeekISO, weekdayShort } from '../../src/utils/date';
+import {
+  formatDatePt,
+  isTodayISO,
+  parseISODate,
+  startOfWeekISO,
+  weekdayShort,
+} from '../../src/utils/date';
 import { showAlert } from '../../src/utils/dialog';
 import { exportEntriesAsCsv } from '../../src/utils/export';
 import { groupEntriesByWeek, sortEntries } from '../../src/utils/schedule';
@@ -48,7 +54,8 @@ function ModuleSection({ module, entries }: { module: Module | null; entries: Sc
         weeks.map((week, idx) => (
           <View key={week.weekStart} style={styles.weekBlock}>
             <Text style={styles.weekLabel}>
-              Semana {module ? weekNumberFromModuleStart(module.startDate, week.weekStart) : idx + 1} (
+              Semana{' '}
+              {module ? weekNumberFromModuleStart(module.startDate, week.weekStart) : idx + 1} (
               {formatDatePt(week.weekStart)} - {formatDatePt(week.weekEnd)})
             </Text>
             {week.days.map((day) => (
@@ -80,7 +87,10 @@ export default function Schedule() {
   const locations = useStore((s) => s.locations);
   const [exporting, setExporting] = useState(false);
 
-  const sortedModules = useMemo(() => [...modules].sort((a, b) => a.startDate.localeCompare(b.startDate)), [modules]);
+  const sortedModules = useMemo(
+    () => [...modules].sort((a, b) => a.startDate.localeCompare(b.startDate)),
+    [modules]
+  );
   const unassigned = useMemo(() => sortEntries(entries.filter((e) => !e.moduleId)), [entries]);
   const entriesByModule = useMemo(() => {
     const map = new Map<string, ScheduleEntry[]>();
@@ -100,7 +110,10 @@ export default function Schedule() {
     try {
       await exportEntriesAsCsv(entries, locations, modules);
     } catch (error) {
-      showAlert('Não foi possível exportar', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert(
+        'Não foi possível exportar',
+        error instanceof Error ? error.message : 'Tente novamente.'
+      );
     } finally {
       setExporting(false);
     }
@@ -146,7 +159,11 @@ export default function Schedule() {
         ) : (
           <>
             {sortedModules.map((module) => (
-              <ModuleSection key={module.id} module={module} entries={entriesByModule.get(module.id) ?? NO_ENTRIES} />
+              <ModuleSection
+                key={module.id}
+                module={module}
+                entries={entriesByModule.get(module.id) ?? NO_ENTRIES}
+              />
             ))}
             {unassigned.length > 0 && <ModuleSection module={null} entries={unassigned} />}
           </>
@@ -180,7 +197,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   exportButtonText: { color: colors.primary, fontWeight: '700', fontSize: 12 },
-  moduleAddButton: { backgroundColor: colors.primaryLight, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+  moduleAddButton: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
   moduleAddButtonText: { color: colors.primaryDark, fontWeight: '700', fontSize: 12 },
   content: { padding: 16, paddingBottom: 100 },
   moduleSection: { marginBottom: 20 },
@@ -189,7 +211,13 @@ const styles = StyleSheet.create({
   moduleHeaderDates: { color: '#fff', fontSize: 12, opacity: 0.9, marginTop: 2 },
   emptyModuleText: { fontSize: 13, color: colors.textMuted, paddingVertical: 8 },
   weekBlock: { marginBottom: 14 },
-  weekLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, marginBottom: 8, textTransform: 'uppercase' },
+  weekLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textMuted,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
   dayRow: { flexDirection: 'row', marginBottom: 4 },
   dayLabelBox: { width: 44, alignItems: 'center', paddingTop: 10 },
   dayLabel: { fontSize: 12, fontWeight: '700', color: colors.text },

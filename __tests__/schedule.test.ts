@@ -1,8 +1,17 @@
 import { ScheduleEntry } from '../src/types';
-import { entriesForDate, groupEntriesByDate, groupEntriesByWeek, sortEntries } from '../src/utils/schedule';
+import {
+  entriesForDate,
+  groupEntriesByDate,
+  groupEntriesByWeek,
+  sortEntries,
+} from '../src/utils/schedule';
 
 const makeEntry = (patch: Partial<ScheduleEntry> = {}): ScheduleEntry => ({
-  id: 'a', title: 'Aula', startDate: '2026-01-04', endDate: '2026-01-05', ...patch,
+  id: 'a',
+  title: 'Aula',
+  startDate: '2026-01-04',
+  endDate: '2026-01-05',
+  ...patch,
 });
 
 afterEach(() => jest.restoreAllMocks());
@@ -22,8 +31,16 @@ it('agrupa intervalo inclusivo e ordena atividades sem alterar entrada', () => {
 it('separa domingo e segunda nas semanas corretas, inclusive na virada do ano', () => {
   const entry = makeEntry();
   expect(groupEntriesByWeek([entry])).toEqual([
-    { weekStart: '2025-12-29', weekEnd: '2026-01-04', days: [{ date: '2026-01-04', entries: [entry] }] },
-    { weekStart: '2026-01-05', weekEnd: '2026-01-11', days: [{ date: '2026-01-05', entries: [entry] }] },
+    {
+      weekStart: '2025-12-29',
+      weekEnd: '2026-01-04',
+      days: [{ date: '2026-01-04', entries: [entry] }],
+    },
+    {
+      weekStart: '2026-01-05',
+      weekEnd: '2026-01-11',
+      days: [{ date: '2026-01-05', entries: [entry] }],
+    },
   ]);
 });
 
@@ -34,7 +51,9 @@ it('retorna grupos vazios quando nao ha atividades', () => {
 
 it('expande exatamente 366 dias sem aviso, incluindo 29 de fevereiro', () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  const days = groupEntriesByDate([makeEntry({ id: '366', startDate: '2024-01-01', endDate: '2024-12-31' })]);
+  const days = groupEntriesByDate([
+    makeEntry({ id: '366', startDate: '2024-01-01', endDate: '2024-12-31' }),
+  ]);
   expect(days).toHaveLength(366);
   expect(days[59].date).toBe('2024-02-29');
   expect(days[365].date).toBe('2024-12-31');

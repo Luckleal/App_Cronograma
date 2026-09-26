@@ -1,7 +1,12 @@
 import { buildEntriesCsv } from '../src/utils/csv';
 import { ScheduleEntry } from '../src/types';
 
-const entry: ScheduleEntry = { id: 'csv', title: 'Aula', startDate: '2026-02-01', endDate: '2026-02-01' };
+const entry: ScheduleEntry = {
+  id: 'csv',
+  title: 'Aula',
+  startDate: '2026-02-01',
+  endDate: '2026-02-01',
+};
 
 describe('buildEntriesCsv', () => {
   it.each([
@@ -19,10 +24,24 @@ describe('buildEntriesCsv', () => {
   });
 
   it('inclui BOM, cabecalho acentuado e dados associados escapados', () => {
-    const csv = buildEntriesCsv([{ ...entry, locationId: 'l', moduleId: 'm', notes: 'Observação, útil' }],
+    const csv = buildEntriesCsv(
+      [{ ...entry, locationId: 'l', moduleId: 'm', notes: 'Observação, útil' }],
       [{ id: 'l', name: 'Clínica', address: 'Rua "A"', color: '#fff' }],
-      [{ id: 'm', name: 'Módulo 1', startDate: entry.startDate, endDate: entry.endDate, color: '#fff' }]);
-    expect(csv.startsWith('\uFEFFData início,Data fim,Horário início,Horário fim,Título,Local,Endereço,Módulo,Observações\r\n')).toBe(true);
+      [
+        {
+          id: 'm',
+          name: 'Módulo 1',
+          startDate: entry.startDate,
+          endDate: entry.endDate,
+          color: '#fff',
+        },
+      ]
+    );
+    expect(
+      csv.startsWith(
+        '\uFEFFData início,Data fim,Horário início,Horário fim,Título,Local,Endereço,Módulo,Observações\r\n'
+      )
+    ).toBe(true);
     expect(csv.endsWith('Aula,Clínica,"Rua ""A""",Módulo 1,"Observação, útil"')).toBe(true);
   });
 });

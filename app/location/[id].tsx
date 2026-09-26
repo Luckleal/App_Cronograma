@@ -1,6 +1,15 @@
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { ColorPicker } from '../../src/components/ColorPicker';
 import { EmptyState } from '../../src/components/EmptyState';
 import { useStore } from '../../src/store/useStore';
@@ -23,7 +32,9 @@ export default function LocationForm() {
   const [name, setName] = useState(existing?.name ?? '');
   const [address, setAddress] = useState(existing?.address ?? '');
   const [notes, setNotes] = useState(existing?.notes ?? '');
-  const [color, setColor] = useState(existing?.color ?? locationPalette[locations.length % locationPalette.length]);
+  const [color, setColor] = useState(
+    existing?.color ?? locationPalette[locations.length % locationPalette.length]
+  );
   const [saving, setSaving] = useState(false);
 
   useLayoutEffect(() => {
@@ -50,7 +61,12 @@ export default function LocationForm() {
 
   async function handleSave() {
     if (saving) return;
-    const payload = { name: name.trim(), address: address.trim() || undefined, notes: notes.trim() || undefined, color };
+    const payload = {
+      name: name.trim(),
+      address: address.trim() || undefined,
+      notes: notes.trim() || undefined,
+      color,
+    };
 
     if (!isNew) {
       if (!existing) {
@@ -62,7 +78,10 @@ export default function LocationForm() {
         await updateLocation(existing.id, payload);
         router.back();
       } catch (error) {
-        showAlert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
+        showAlert(
+          'Não foi possível salvar',
+          error instanceof Error ? error.message : 'Tente novamente.'
+        );
       } finally {
         setSaving(false);
       }
@@ -96,14 +115,20 @@ export default function LocationForm() {
       await deleteLocation(existing.id);
       router.back();
     } catch (error) {
-      showAlert('Não foi possível excluir', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert(
+        'Não foi possível excluir',
+        error instanceof Error ? error.message : 'Tente novamente.'
+      );
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.safe}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.label}>Nome do local</Text>
         <TextInput
@@ -141,7 +166,9 @@ export default function LocationForm() {
           disabled={!canSave || saving}
           onPress={handleSave}
         >
-          <Text style={styles.saveButtonText}>{isNew ? 'Adicionar local' : 'Salvar alterações'}</Text>
+          <Text style={styles.saveButtonText}>
+            {isNew ? 'Adicionar local' : 'Salvar alterações'}
+          </Text>
         </Pressable>
 
         {!isNew && (
@@ -169,12 +196,23 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   textArea: { minHeight: 70, textAlignVertical: 'top', paddingTop: 12 },
-  saveButton: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 28 },
+  saveButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 28,
+  },
   saveButtonDisabled: { opacity: 0.5 },
   saveButtonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   deleteButton: { alignItems: 'center', paddingVertical: 14, marginTop: 4 },
   deleteButtonText: { color: colors.danger, fontWeight: '600' },
   notFoundWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 },
-  notFoundButton: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24 },
+  notFoundButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
   notFoundButtonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

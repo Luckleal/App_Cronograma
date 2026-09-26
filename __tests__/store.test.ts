@@ -1,12 +1,24 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { File, Paths } from 'expo-file-system';
+import * as Notifications from 'expo-notifications';
+import { useStore } from '../src/store/useStore';
+import { Profile, ScheduleEntry } from '../src/types';
+
 jest.mock('@react-native-async-storage/async-storage', () => {
   const data = new Map<string, string>();
   return {
     __esModule: true,
     default: {
       getItem: jest.fn(async (key: string) => data.get(key) ?? null),
-      setItem: jest.fn(async (key: string, value: string) => { data.set(key, value); }),
-      removeItem: jest.fn(async (key: string) => { data.delete(key); }),
-      clear: jest.fn(async () => { data.clear(); }),
+      setItem: jest.fn(async (key: string, value: string) => {
+        data.set(key, value);
+      }),
+      removeItem: jest.fn(async (key: string) => {
+        data.delete(key);
+      }),
+      clear: jest.fn(async () => {
+        data.clear();
+      }),
     },
   };
 });
@@ -25,25 +37,28 @@ jest.mock('expo-notifications', () => ({
   AndroidImportance: { HIGH: 4 },
 }));
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { File, Paths } from 'expo-file-system';
-import * as Notifications from 'expo-notifications';
-import { useStore } from '../src/store/useStore';
-import { Profile, ScheduleEntry } from '../src/types';
-
 const schedule = jest.mocked(Notifications.scheduleNotificationAsync);
 const cancel = jest.mocked(Notifications.cancelScheduledNotificationAsync);
 const profile: Profile = {
-  name: '', course: '', notificationsEnabled: true, nightBeforeEnabled: true,
-  nightBeforeTime: '20:00', sameDayMinutesBefore: 60,
+  name: '',
+  course: '',
+  notificationsEnabled: true,
+  nightBeforeEnabled: true,
+  nightBeforeTime: '20:00',
+  sameDayMinutesBefore: 60,
 };
 const entry = (id: string): ScheduleEntry => ({
-  id, title: id, startDate: '2030-06-10', endDate: '2030-06-10',
+  id,
+  title: id,
+  startDate: '2030-06-10',
+  endDate: '2030-06-10',
 });
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => { resolve = done; });
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
   return { promise, resolve };
 }
 
@@ -58,7 +73,15 @@ beforeEach(async () => {
   let nextId = 0;
   schedule.mockImplementation(async () => `notification-${++nextId}`);
   jest.spyOn(Date, 'now').mockReturnValue(new Date(2029, 0, 1).getTime());
-  useStore.setState({ profile: { ...profile }, entries: [], locations: [], modules: [], onboarded: false, hydrated: true, timeZone: 'America/Sao_Paulo' });
+  useStore.setState({
+    profile: { ...profile },
+    entries: [],
+    locations: [],
+    modules: [],
+    onboarded: false,
+    hydrated: true,
+    timeZone: 'America/Sao_Paulo',
+  });
 });
 
 afterEach(() => jest.restoreAllMocks());
@@ -97,7 +120,9 @@ it.each([
 
 it('checkTimeZone nao reagenda nem grava quando o fuso do celular permanece igual', async () => {
   const options = Intl.DateTimeFormat().resolvedOptions();
-  jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({ ...options, timeZone: 'America/Sao_Paulo' });
+  jest
+    .spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
+    .mockReturnValue({ ...options, timeZone: 'America/Sao_Paulo' });
   useStore.setState({ entries: [{ ...entry('A'), nightBeforeNotificationId: 'existing-A' }] });
   const rawBefore = await AsyncStorage.getItem('cronograma-storage');
   jest.mocked(AsyncStorage.setItem).mockClear();
@@ -113,11 +138,15 @@ it('checkTimeZone nao reagenda nem grava quando o fuso do celular permanece igua
 
 it('checkTimeZone reagenda todas as atividades e persiste o novo fuso do celular', async () => {
   const options = Intl.DateTimeFormat().resolvedOptions();
-  jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({ ...options, timeZone: 'Europe/Lisbon' });
-  useStore.setState({ entries: [
-    { ...entry('A'), nightBeforeNotificationId: 'old-A' },
-    { ...entry('B'), nightBeforeNotificationId: 'old-B' },
-  ] });
+  jest
+    .spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
+    .mockReturnValue({ ...options, timeZone: 'Europe/Lisbon' });
+  useStore.setState({
+    entries: [
+      { ...entry('A'), nightBeforeNotificationId: 'old-A' },
+      { ...entry('B'), nightBeforeNotificationId: 'old-B' },
+    ],
+  });
   jest.mocked(AsyncStorage.setItem).mockClear();
 
   await useStore.getState().checkTimeZone();
@@ -125,7 +154,10 @@ it('checkTimeZone reagenda todas as atividades e persiste o novo fuso do celular
   expect(cancel.mock.calls).toEqual([['old-A'], ['old-B']]);
   expect(schedule.mock.calls.map(([request]) => request.content.body)).toEqual(['A', 'B']);
   expect(useStore.getState().timeZone).toBe('Europe/Lisbon');
-  expect(useStore.getState().entries.map((item) => item.nightBeforeNotificationId)).toEqual(['notification-1', 'notification-2']);
+  expect(useStore.getState().entries.map((item) => item.nightBeforeNotificationId)).toEqual([
+    'notification-1',
+    'notification-2',
+  ]);
   expect(AsyncStorage.setItem).toHaveBeenCalled();
   const persisted = JSON.parse((await AsyncStorage.getItem('cronograma-storage'))!);
   expect(persisted.state.timeZone).toBe('Europe/Lisbon');
@@ -150,7 +182,9 @@ it('serializa reagendamentos e preserva atividade adicionada durante o loop', as
   const first = useStore.getState().rescheduleAllNotifications();
   await started.promise;
 
-  const added = useStore.getState().addEntry({ title: 'C', startDate: '2030-06-10', endDate: '2030-06-10' });
+  const added = useStore
+    .getState()
+    .addEntry({ title: 'C', startDate: '2030-06-10', endDate: '2030-06-10' });
   const second = useStore.getState().rescheduleAllNotifications();
   try {
     // Drain promise continuations while the first native operation remains blocked.
@@ -162,7 +196,14 @@ it('serializa reagendamentos e preserva atividade adicionada durante o loop', as
     await Promise.all([first, added, second]);
   }
 
-  expect(schedule.mock.calls.map(([request]) => request.content.body)).toEqual(['A', 'B', 'C', 'A', 'B', 'C']);
+  expect(schedule.mock.calls.map(([request]) => request.content.body)).toEqual([
+    'A',
+    'B',
+    'C',
+    'A',
+    'B',
+    'C',
+  ]);
   const entries = useStore.getState().entries;
   expect(entries.map((item) => item.title)).toEqual(['A', 'B', 'C']);
   expect(new Set(entries.map((item) => item.nightBeforeNotificationId)).size).toBe(3);
@@ -194,27 +235,51 @@ it('addEntry salva e persiste mesmo quando o agendamento falha, e a fila continu
 
 it('salva a atividade e cancela o primeiro lembrete quando o segundo falha', async () => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  schedule.mockResolvedValueOnce('partial-reminder').mockRejectedValueOnce(new Error('segundo lembrete falhou'));
+  schedule
+    .mockResolvedValueOnce('partial-reminder')
+    .mockRejectedValueOnce(new Error('segundo lembrete falhou'));
 
-  await useStore.getState().addEntry({ title: 'Dois lembretes', startDate: '2030-06-10', endDate: '2030-06-10', startTime: '10:00' });
+  await useStore.getState().addEntry({
+    title: 'Dois lembretes',
+    startDate: '2030-06-10',
+    endDate: '2030-06-10',
+    startTime: '10:00',
+  });
 
   expect(schedule).toHaveBeenCalledTimes(2);
   expect(cancel).toHaveBeenCalledWith('partial-reminder');
   expect(useStore.getState().entries).toHaveLength(1);
-  expect(useStore.getState().entries[0]).toMatchObject({ title: 'Dois lembretes', nightBeforeNotificationId: undefined, sameDayNotificationId: undefined });
+  expect(useStore.getState().entries[0]).toMatchObject({
+    title: 'Dois lembretes',
+    nightBeforeNotificationId: undefined,
+    sameDayNotificationId: undefined,
+  });
 });
 
 it('migra perfil parcial mesclando padroes e preservando escolhas falsas e zero', async () => {
-  await AsyncStorage.setItem('cronograma-storage', JSON.stringify({ version: 0, state: {
-    onboarded: true,
-    profile: { name: 'Yasmin', notificationsEnabled: false, sameDayMinutesBefore: 0 },
-    entries: [{ id: 'old', title: 'Legado', date: '2024-02-29' }],
-  } }));
+  await AsyncStorage.setItem(
+    'cronograma-storage',
+    JSON.stringify({
+      version: 0,
+      state: {
+        onboarded: true,
+        profile: { name: 'Yasmin', notificationsEnabled: false, sameDayMinutesBefore: 0 },
+        entries: [{ id: 'old', title: 'Legado', date: '2024-02-29' }],
+      },
+    })
+  );
 
   await useStore.persist.rehydrate();
 
-  expect(useStore.getState().profile).toEqual({ ...profile, name: 'Yasmin', notificationsEnabled: false, sameDayMinutesBefore: 0 });
-  expect(useStore.getState().entries).toEqual([{ id: 'old', title: 'Legado', startDate: '2024-02-29', endDate: '2024-02-29' }]);
+  expect(useStore.getState().profile).toEqual({
+    ...profile,
+    name: 'Yasmin',
+    notificationsEnabled: false,
+    sameDayMinutesBefore: 0,
+  });
+  expect(useStore.getState().entries).toEqual([
+    { id: 'old', title: 'Legado', startDate: '2024-02-29', endDate: '2024-02-29' },
+  ]);
   expect(useStore.getState().onboarded).toBe(true);
   expect(useStore.getState().hydrated).toBe(true);
   const persisted = JSON.parse((await AsyncStorage.getItem('cronograma-storage'))!);
@@ -223,7 +288,10 @@ it('migra perfil parcial mesclando padroes e preservando escolhas falsas e zero'
 });
 
 it('migra perfil ausente usando todos os padroes', async () => {
-  await AsyncStorage.setItem('cronograma-storage', JSON.stringify({ version: 0, state: { entries: [] } }));
+  await AsyncStorage.setItem(
+    'cronograma-storage',
+    JSON.stringify({ version: 0, state: { entries: [] } })
+  );
   await useStore.persist.rehydrate();
   expect(useStore.getState().profile).toEqual(profile);
 });
@@ -261,7 +329,14 @@ it('resetAllData remove apenas o snapshot e preserva addEntry durante o cancelam
   expect(schedule).toHaveBeenCalledTimes(1);
   expect(schedule.mock.calls[0][0].content.body).toBe(input.title);
   const remaining = useStore.getState().entries;
-  expect(remaining).toEqual([{ ...input, id: addedId, nightBeforeNotificationId: 'notification-1', sameDayNotificationId: undefined }]);
+  expect(remaining).toEqual([
+    {
+      ...input,
+      id: addedId,
+      nightBeforeNotificationId: 'notification-1',
+      sameDayNotificationId: undefined,
+    },
+  ]);
   expect(useStore.getState().profile).toEqual(profile);
   expect(useStore.getState().onboarded).toBe(false);
   const persisted = JSON.parse((await AsyncStorage.getItem('cronograma-storage'))!);

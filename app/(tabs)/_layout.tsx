@@ -24,28 +24,36 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Hoje',
-          tabBarIcon: ({ focused }) => <IconBadge name={focused ? 'home' : 'home-outline'} active={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <IconBadge name={focused ? 'home' : 'home-outline'} active={focused} />
+          ),
         }}
       />
       <Tabs.Screen
         name="schedule"
         options={{
           title: 'Cronograma',
-          tabBarIcon: ({ focused }) => <IconBadge name={focused ? 'calendar' : 'calendar-outline'} active={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <IconBadge name={focused ? 'calendar' : 'calendar-outline'} active={focused} />
+          ),
         }}
       />
       <Tabs.Screen
         name="locations"
         options={{
           title: 'Locais',
-          tabBarIcon: ({ focused }) => <IconBadge name={focused ? 'location' : 'location-outline'} active={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <IconBadge name={focused ? 'location' : 'location-outline'} active={focused} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ focused }) => <IconBadge name={focused ? 'person' : 'person-outline'} active={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <IconBadge name={focused ? 'person' : 'person-outline'} active={focused} />
+          ),
         }}
       />
     </Tabs>

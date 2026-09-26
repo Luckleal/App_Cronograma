@@ -32,7 +32,11 @@ function toRow(values: string[]): string {
   return values.map(escapeCsvField).join(',');
 }
 
-export function buildEntriesCsv(entries: ScheduleEntry[], locations: StudyLocation[], modules: Module[]): string {
+export function buildEntriesCsv(
+  entries: ScheduleEntry[],
+  locations: StudyLocation[],
+  modules: Module[]
+): string {
   const locationById = new Map(locations.map((l) => [l.id, l]));
   const moduleById = new Map(modules.map((m) => [m.id, m]));
 

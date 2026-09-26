@@ -1,7 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestNotificationPermission } from '../src/notifications';
 import { useStore } from '../src/store/useStore';
@@ -31,15 +39,18 @@ export default function Onboarding() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex}
+      >
         <View style={styles.content}>
           <View style={styles.logo}>
             <Ionicons name="calendar" size={40} color="#FFFFFF" />
           </View>
           <Text style={styles.title}>Meu Cronograma</Text>
           <Text style={styles.subtitle}>
-            Organize seus plantões, aulas e estágios em um só lugar e receba lembretes de onde você precisa
-            estar.
+            Organize seus plantões, aulas e estágios em um só lugar e receba lembretes de onde você
+            precisa estar.
           </Text>
 
           <View style={styles.form}>
@@ -88,7 +99,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: { fontSize: 26, fontWeight: '700', color: colors.text, textAlign: 'center', marginTop: 8 },
-  subtitle: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: 8, marginBottom: 24, lineHeight: 20 },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 24,
+    lineHeight: 20,
+  },
   form: { gap: 6, marginBottom: 24 },
   label: { fontSize: 13, fontWeight: '600', color: colors.text, marginTop: 8 },
   input: {
@@ -101,7 +119,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
   },
-  button: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  button: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });

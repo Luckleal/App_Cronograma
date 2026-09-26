@@ -139,7 +139,9 @@ export function describeReminderPlan(profile: Profile, hasStartTime: boolean): s
     if (hasStartTime) {
       parts.push(`${profile.sameDayMinutesBefore} minutos antes do início`);
     } else {
-      parts.push(`${profile.sameDayMinutesBefore} minutos antes (defina um horário de início para ativar este lembrete)`);
+      parts.push(
+        `${profile.sameDayMinutesBefore} minutos antes (defina um horário de início para ativar este lembrete)`
+      );
     }
   }
 

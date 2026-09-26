@@ -2,7 +2,18 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestNotificationPermission } from '../../src/notifications';
 import { useStore } from '../../src/store/useStore';
@@ -85,7 +96,10 @@ export default function Profile() {
       deleteLocalPhotoFile(previousPhotoUri);
     } catch (error) {
       deleteLocalPhotoFile(dest?.uri);
-      showAlert('Não foi possível salvar a foto', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert(
+        'Não foi possível salvar a foto',
+        error instanceof Error ? error.message : 'Tente novamente.'
+      );
     }
   }
 
@@ -104,7 +118,10 @@ export default function Profile() {
       }
       await setProfile({ notificationsEnabled: granted });
     } catch (error) {
-      showAlert('Não foi possível atualizar', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert(
+        'Não foi possível atualizar',
+        error instanceof Error ? error.message : 'Tente novamente.'
+      );
     }
   }
 
@@ -120,125 +137,136 @@ export default function Profile() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Perfil</Text>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <Text style={styles.title}>Perfil</Text>
 
-        <Pressable
-          style={styles.avatarWrap}
-          onPress={pickPhoto}
-          accessibilityRole="button"
-          accessibilityLabel="Alterar foto de perfil"
-        >
-          {profile.photoUri ? (
-            <Image source={{ uri: profile.photoUri }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarInitial}>{(profile.name || '?').charAt(0).toUpperCase()}</Text>
-            </View>
-          )}
-          <Text style={styles.avatarHint}>Toque para alterar a foto</Text>
-        </Pressable>
-
-        <Text style={styles.label}>Nome</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          onBlur={() => setProfile({ name: name.trim() })}
-          placeholder="Seu nome"
-          placeholderTextColor={colors.textMuted}
-        />
-
-        <Text style={styles.label}>Curso ou turma</Text>
-        <TextInput
-          style={styles.input}
-          value={course}
-          onChangeText={setCourse}
-          onBlur={() => setProfile({ course: course.trim() })}
-          placeholder="Ex: Medicina - Internato"
-          placeholderTextColor={colors.textMuted}
-        />
-
-        <Text style={styles.sectionTitle}>Notificações</Text>
-
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>Ativar notificações</Text>
-          <Switch
-            value={profile.notificationsEnabled}
-            onValueChange={toggleNotifications}
-            trackColor={{ false: colors.border, true: colors.primary }}
-            thumbColor="#FFFFFF"
-            ios_backgroundColor={colors.border}
-          />
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.rowLabel}>Lembrete na noite anterior</Text>
-          <Switch
-            value={profile.nightBeforeEnabled}
-            onValueChange={(v) => setProfile({ nightBeforeEnabled: v })}
-            disabled={!profile.notificationsEnabled}
-            trackColor={{ false: colors.border, true: colors.primary }}
-            thumbColor="#FFFFFF"
-            ios_backgroundColor={colors.border}
-          />
-        </View>
-
-        {profile.nightBeforeEnabled && profile.notificationsEnabled && (
           <Pressable
-            style={styles.timeRow}
-            onPress={() => setShowTimePicker(true)}
+            style={styles.avatarWrap}
+            onPress={pickPhoto}
             accessibilityRole="button"
-            accessibilityLabel={`Horário do lembrete: ${profile.nightBeforeTime}`}
+            accessibilityLabel="Alterar foto de perfil"
           >
-            <Text style={styles.rowLabel}>Horário do lembrete</Text>
-            <Text style={styles.timeValue}>{profile.nightBeforeTime}</Text>
+            {profile.photoUri ? (
+              <Image source={{ uri: profile.photoUri }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarInitial}>
+                  {(profile.name || '?').charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <Text style={styles.avatarHint}>Toque para alterar a foto</Text>
           </Pressable>
-        )}
 
-        {showTimePicker && (
-          <DateTimePicker
-            value={combineDateAndTime(todayISO(), profile.nightBeforeTime)}
-            mode="time"
-            is24Hour
-            onChange={(event, selected) => {
-              setShowTimePicker(Platform.OS === 'ios');
-              if (event.type === 'set' && selected) {
-                const hh = String(selected.getHours()).padStart(2, '0');
-                const mm = String(selected.getMinutes()).padStart(2, '0');
-                const time = `${hh}:${mm}`;
-                if (isValidTime(time)) setProfile({ nightBeforeTime: time });
-              }
-            }}
+          <Text style={styles.label}>Nome</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            onBlur={() => setProfile({ name: name.trim() })}
+            placeholder="Seu nome"
+            placeholderTextColor={colors.textMuted}
           />
-        )}
 
-        <Text style={[styles.rowLabel, styles.optionsLabel]}>Lembrete no dia da atividade</Text>
-        <View style={styles.optionsWrap}>
-          {REMINDER_OPTIONS.map((opt) => (
+          <Text style={styles.label}>Curso ou turma</Text>
+          <TextInput
+            style={styles.input}
+            value={course}
+            onChangeText={setCourse}
+            onBlur={() => setProfile({ course: course.trim() })}
+            placeholder="Ex: Medicina - Internato"
+            placeholderTextColor={colors.textMuted}
+          />
+
+          <Text style={styles.sectionTitle}>Notificações</Text>
+
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>Ativar notificações</Text>
+            <Switch
+              value={profile.notificationsEnabled}
+              onValueChange={toggleNotifications}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor={colors.border}
+            />
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.rowLabel}>Lembrete na noite anterior</Text>
+            <Switch
+              value={profile.nightBeforeEnabled}
+              onValueChange={(v) => setProfile({ nightBeforeEnabled: v })}
+              disabled={!profile.notificationsEnabled}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor={colors.border}
+            />
+          </View>
+
+          {profile.nightBeforeEnabled && profile.notificationsEnabled && (
             <Pressable
-              key={opt.value}
-              style={[styles.option, profile.sameDayMinutesBefore === opt.value && styles.optionSelected]}
-              onPress={() => setProfile({ sameDayMinutesBefore: opt.value })}
+              style={styles.timeRow}
+              onPress={() => setShowTimePicker(true)}
               accessibilityRole="button"
-              accessibilityLabel={opt.label}
-              accessibilityState={{ selected: profile.sameDayMinutesBefore === opt.value }}
+              accessibilityLabel={`Horário do lembrete: ${profile.nightBeforeTime}`}
             >
-              <Text
-                style={[styles.optionText, profile.sameDayMinutesBefore === opt.value && styles.optionTextSelected]}
-              >
-                {opt.label}
-              </Text>
+              <Text style={styles.rowLabel}>Horário do lembrete</Text>
+              <Text style={styles.timeValue}>{profile.nightBeforeTime}</Text>
             </Pressable>
-          ))}
-        </View>
+          )}
 
-        <Text style={styles.sectionTitle}>Dados</Text>
-        <Pressable style={styles.dangerButton} onPress={confirmReset}>
-          <Text style={styles.dangerButtonText}>Limpar todos os dados</Text>
-        </Pressable>
-      </ScrollView>
+          {showTimePicker && (
+            <DateTimePicker
+              value={combineDateAndTime(todayISO(), profile.nightBeforeTime)}
+              mode="time"
+              is24Hour
+              onChange={(event, selected) => {
+                setShowTimePicker(Platform.OS === 'ios');
+                if (event.type === 'set' && selected) {
+                  const hh = String(selected.getHours()).padStart(2, '0');
+                  const mm = String(selected.getMinutes()).padStart(2, '0');
+                  const time = `${hh}:${mm}`;
+                  if (isValidTime(time)) setProfile({ nightBeforeTime: time });
+                }
+              }}
+            />
+          )}
+
+          <Text style={[styles.rowLabel, styles.optionsLabel]}>Lembrete no dia da atividade</Text>
+          <View style={styles.optionsWrap}>
+            {REMINDER_OPTIONS.map((opt) => (
+              <Pressable
+                key={opt.value}
+                style={[
+                  styles.option,
+                  profile.sameDayMinutesBefore === opt.value && styles.optionSelected,
+                ]}
+                onPress={() => setProfile({ sameDayMinutesBefore: opt.value })}
+                accessibilityRole="button"
+                accessibilityLabel={opt.label}
+                accessibilityState={{ selected: profile.sameDayMinutesBefore === opt.value }}
+              >
+                <Text
+                  style={[
+                    styles.optionText,
+                    profile.sameDayMinutesBefore === opt.value && styles.optionTextSelected,
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.sectionTitle}>Dados</Text>
+          <Pressable style={styles.dangerButton} onPress={confirmReset}>
+            <Text style={styles.dangerButtonText}>Limpar todos os dados</Text>
+          </Pressable>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -251,7 +279,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 16 },
   avatarWrap: { alignItems: 'center', marginBottom: 20, gap: 6 },
   avatar: { width: 88, height: 88, borderRadius: 44 },
-  avatarPlaceholder: { backgroundColor: colors.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  avatarPlaceholder: {
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   avatarInitial: { fontSize: 32, fontWeight: '700', color: colors.primaryDark },
   avatarHint: { fontSize: 12, color: colors.textMuted },
   label: { fontSize: 13, fontWeight: '600', color: colors.text, marginTop: 12, marginBottom: 6 },
@@ -265,7 +297,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
   },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginTop: 24, marginBottom: 8 },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 24,
+    marginBottom: 8,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

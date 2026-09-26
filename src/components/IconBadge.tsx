@@ -4,7 +4,15 @@ import { colors } from '../theme';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-export function IconBadge({ name, active, size = 34 }: { name: IconName; active: boolean; size?: number }) {
+export function IconBadge({
+  name,
+  active,
+  size = 34,
+}: {
+  name: IconName;
+  active: boolean;
+  size?: number;
+}) {
   return (
     <View
       style={[

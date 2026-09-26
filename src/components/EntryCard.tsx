@@ -16,7 +16,9 @@ export function EntryCard({ entry, highlight }: { entry: ScheduleEntry; highligh
       onPress={() => router.push(`/entry/${entry.id}`)}
       style={[styles.card, highlight && styles.cardHighlight]}
     >
-      <View style={[styles.colorBar, { backgroundColor: location?.color ?? colors.primaryLight }]} />
+      <View
+        style={[styles.colorBar, { backgroundColor: location?.color ?? colors.primaryLight }]}
+      />
       <View style={styles.content}>
         <View style={styles.topRow}>
           {!!timeRange && <Text style={styles.time}>{timeRange}</Text>}
@@ -57,7 +59,12 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingVertical: 10, paddingHorizontal: 12, gap: 3 },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   time: { fontWeight: '700', color: colors.text, fontSize: 13 },
-  locationChip: { backgroundColor: colors.primaryLight, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
+  locationChip: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
   locationChipText: { fontSize: 11, fontWeight: '600', color: colors.primaryDark },
   title: { fontSize: 15, fontWeight: '600', color: colors.text },
   rangeText: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },

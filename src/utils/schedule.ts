@@ -27,7 +27,11 @@ function expandEntryDates(entry: ScheduleEntry): string[] {
     dates.push(cursor);
     cursor = addDays(cursor, 1);
   }
-  if (i === MAX_ENTRY_SPAN_DAYS && compareISODate(cursor, entry.endDate) <= 0 && !warnedTruncatedEntryIds.has(entry.id)) {
+  if (
+    i === MAX_ENTRY_SPAN_DAYS &&
+    compareISODate(cursor, entry.endDate) <= 0 &&
+    !warnedTruncatedEntryIds.has(entry.id)
+  ) {
     warnedTruncatedEntryIds.add(entry.id);
     console.warn(
       `Atividade "${entry.title}" (${entry.id}) tem intervalo maior que ${MAX_ENTRY_SPAN_DAYS} dias; exibição no calendário foi limitada a esse período.`
@@ -38,7 +42,9 @@ function expandEntryDates(entry: ScheduleEntry): string[] {
 
 export function entriesForDate(entries: ScheduleEntry[], dateISO: string): ScheduleEntry[] {
   return sortEntries(
-    entries.filter((e) => compareISODate(e.startDate, dateISO) <= 0 && compareISODate(e.endDate, dateISO) >= 0)
+    entries.filter(
+      (e) => compareISODate(e.startDate, dateISO) <= 0 && compareISODate(e.endDate, dateISO) >= 0
+    )
   );
 }
 
@@ -47,7 +53,9 @@ export function upcomingEntries(entries: ScheduleEntry[], limit = 5): ScheduleEn
   return sortEntries(entries.filter((e) => compareISODate(e.endDate, today) >= 0)).slice(0, limit);
 }
 
-export function groupEntriesByDate(entries: ScheduleEntry[]): { date: string; entries: ScheduleEntry[] }[] {
+export function groupEntriesByDate(
+  entries: ScheduleEntry[]
+): { date: string; entries: ScheduleEntry[] }[] {
   const byDate = new Map<string, ScheduleEntry[]>();
   for (const entry of entries) {
     for (const date of expandEntryDates(entry)) {
@@ -65,7 +73,11 @@ export function groupEntriesByWeek(
   entries: ScheduleEntry[]
 ): { weekStart: string; weekEnd: string; days: { date: string; entries: ScheduleEntry[] }[] }[] {
   const byDate = groupEntriesByDate(entries);
-  const weeks: { weekStart: string; weekEnd: string; days: { date: string; entries: ScheduleEntry[] }[] }[] = [];
+  const weeks: {
+    weekStart: string;
+    weekEnd: string;
+    days: { date: string; entries: ScheduleEntry[] }[];
+  }[] = [];
   for (const day of byDate) {
     const weekStart = startOfWeekISO(day.date);
     const last = weeks[weeks.length - 1];

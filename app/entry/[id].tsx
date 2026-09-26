@@ -1,7 +1,16 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { EmptyState } from '../../src/components/EmptyState';
 import { describeReminderPlan } from '../../src/notifications';
 import { useStore } from '../../src/store/useStore';
@@ -74,7 +83,8 @@ export default function EntryForm() {
   }
 
   const canSave = title.trim().length > 0;
-  const sameDayTimeWarning = startDate === endDate && !!startTime && !!endTime && endTime < startTime;
+  const sameDayTimeWarning =
+    startDate === endDate && !!startTime && !!endTime && endTime < startTime;
 
   async function handleSave() {
     if (saving) return;
@@ -109,7 +119,10 @@ export default function EntryForm() {
         await updateEntry(existing.id, payload);
         router.back();
       } catch (error) {
-        showAlert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
+        showAlert(
+          'Não foi possível salvar',
+          error instanceof Error ? error.message : 'Tente novamente.'
+        );
       } finally {
         setSaving(false);
       }
@@ -121,9 +134,12 @@ export default function EntryForm() {
       payload.startDate === payload.endDate
         ? `${weekdayLong(payload.startDate)}, ${formatDateFullPt(payload.startDate)}`
         : `${formatDateFullPt(payload.startDate)} a ${formatDateFullPt(payload.endDate)}`;
-    const summaryLines = [payload.title, dateLine, formatTimeRange(payload.startTime, payload.endTime), location?.name].filter(
-      Boolean
-    );
+    const summaryLines = [
+      payload.title,
+      dateLine,
+      formatTimeRange(payload.startTime, payload.endTime),
+      location?.name,
+    ].filter(Boolean);
     const reminderText = describeReminderPlan(profile, !!payload.startTime);
 
     const confirmed = await confirmAsync(
@@ -137,7 +153,10 @@ export default function EntryForm() {
       await addEntry(payload);
       router.back();
     } catch (error) {
-      showAlert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert(
+        'Não foi possível salvar',
+        error instanceof Error ? error.message : 'Tente novamente.'
+      );
     } finally {
       setSaving(false);
     }
@@ -156,14 +175,20 @@ export default function EntryForm() {
       await deleteEntry(existing.id);
       router.back();
     } catch (error) {
-      showAlert('Não foi possível excluir', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert(
+        'Não foi possível excluir',
+        error instanceof Error ? error.message : 'Tente novamente.'
+      );
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.safe}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.label}>Título da atividade</Text>
         <TextInput
@@ -232,7 +257,9 @@ export default function EntryForm() {
                 style={[styles.input, styles.timeInputMain]}
                 onPress={() => setShowStartPicker(true)}
                 accessibilityRole="button"
-                accessibilityLabel={startTime ? `Horário de início: ${startTime}` : 'Definir horário de início'}
+                accessibilityLabel={
+                  startTime ? `Horário de início: ${startTime}` : 'Definir horário de início'
+                }
               >
                 <Text style={styles.inputText}>{startTime ?? 'Definir'}</Text>
               </Pressable>
@@ -255,7 +282,9 @@ export default function EntryForm() {
                 onChange={(event, selected) => {
                   setShowStartPicker(Platform.OS === 'ios');
                   if (event.type === 'set' && selected) {
-                    setStartTime(`${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`);
+                    setStartTime(
+                      `${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`
+                    );
                   }
                 }}
               />
@@ -268,7 +297,9 @@ export default function EntryForm() {
                 style={[styles.input, styles.timeInputMain]}
                 onPress={() => setShowEndPicker(true)}
                 accessibilityRole="button"
-                accessibilityLabel={endTime ? `Horário de fim: ${endTime}` : 'Definir horário de fim'}
+                accessibilityLabel={
+                  endTime ? `Horário de fim: ${endTime}` : 'Definir horário de fim'
+                }
               >
                 <Text style={styles.inputText}>{endTime ?? 'Definir'}</Text>
               </Pressable>
@@ -291,7 +322,9 @@ export default function EntryForm() {
                 onChange={(event, selected) => {
                   setShowEndPicker(Platform.OS === 'ios');
                   if (event.type === 'set' && selected) {
-                    setEndTime(`${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`);
+                    setEndTime(
+                      `${String(selected.getHours()).padStart(2, '0')}:${String(selected.getMinutes()).padStart(2, '0')}`
+                    );
                   }
                 }}
               />
@@ -301,7 +334,8 @@ export default function EntryForm() {
 
         {sameDayTimeWarning && (
           <Text style={styles.warningText}>
-            O horário de fim é antes do início. Se for um plantão que passa da meia-noite, use datas diferentes.
+            O horário de fim é antes do início. Se for um plantão que passa da meia-noite, use datas
+            diferentes.
           </Text>
         )}
 
@@ -319,13 +353,18 @@ export default function EntryForm() {
           {locations.map((loc) => (
             <Pressable
               key={loc.id}
-              style={[styles.chip, locationId === loc.id && { backgroundColor: loc.color, borderColor: loc.color }]}
+              style={[
+                styles.chip,
+                locationId === loc.id && { backgroundColor: loc.color, borderColor: loc.color },
+              ]}
               onPress={() => setLocationId(loc.id)}
               accessibilityRole="button"
               accessibilityLabel={loc.name}
               accessibilityState={{ selected: locationId === loc.id }}
             >
-              <Text style={[styles.chipText, locationId === loc.id && styles.chipTextSelected]}>{loc.name}</Text>
+              <Text style={[styles.chipText, locationId === loc.id && styles.chipTextSelected]}>
+                {loc.name}
+              </Text>
             </Pressable>
           ))}
           <Pressable
@@ -352,13 +391,18 @@ export default function EntryForm() {
           {modules.map((mod) => (
             <Pressable
               key={mod.id}
-              style={[styles.chip, moduleId === mod.id && { backgroundColor: mod.color, borderColor: mod.color }]}
+              style={[
+                styles.chip,
+                moduleId === mod.id && { backgroundColor: mod.color, borderColor: mod.color },
+              ]}
               onPress={() => setModuleId(mod.id)}
               accessibilityRole="button"
               accessibilityLabel={mod.name}
               accessibilityState={{ selected: moduleId === mod.id }}
             >
-              <Text style={[styles.chipText, moduleId === mod.id && styles.chipTextSelected]}>{mod.name}</Text>
+              <Text style={[styles.chipText, moduleId === mod.id && styles.chipTextSelected]}>
+                {mod.name}
+              </Text>
             </Pressable>
           ))}
           <Pressable
@@ -386,7 +430,9 @@ export default function EntryForm() {
           disabled={!canSave || saving}
           onPress={handleSave}
         >
-          <Text style={styles.saveButtonText}>{isNew ? 'Adicionar atividade' : 'Salvar alterações'}</Text>
+          <Text style={styles.saveButtonText}>
+            {isNew ? 'Adicionar atividade' : 'Salvar alterações'}
+          </Text>
         </Pressable>
 
         {!isNew && (
@@ -430,7 +476,12 @@ const styles = StyleSheet.create({
   clearButtonText: { fontSize: 18, color: colors.textMuted, lineHeight: 20 },
   warningText: { color: colors.danger, fontSize: 12, marginTop: 8 },
   notFoundWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 },
-  notFoundButton: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24 },
+  notFoundButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
   notFoundButtonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
@@ -444,9 +495,22 @@ const styles = StyleSheet.create({
   chipSelected: { backgroundColor: colors.text, borderColor: colors.text },
   chipText: { fontSize: 13, color: colors.text },
   chipTextSelected: { color: '#fff', fontWeight: '700' },
-  chipAdd: { borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: colors.primary, borderStyle: 'dashed' },
+  chipAdd: {
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderStyle: 'dashed',
+  },
   chipAddText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
-  saveButton: { backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 28 },
+  saveButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 28,
+  },
   saveButtonDisabled: { opacity: 0.5 },
   saveButtonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   deleteButton: { alignItems: 'center', paddingVertical: 14, marginTop: 4 },

@@ -32,7 +32,9 @@ export default function Locations() {
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{item.name}</Text>
                 {!!item.address && <Text style={styles.cardSubtitle}>{item.address}</Text>}
-                <Text style={styles.cardCount}>{count} atividade{count === 1 ? '' : 's'}</Text>
+                <Text style={styles.cardCount}>
+                  {count} atividade{count === 1 ? '' : 's'}
+                </Text>
               </View>
             </Pressable>
           );
@@ -45,7 +47,14 @@ export default function Locations() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
   content: { padding: 16, paddingBottom: 100, flexGrow: 1 },
   card: {
     flexDirection: 'row',
