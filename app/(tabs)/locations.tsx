@@ -38,7 +38,7 @@ export default function Locations() {
           );
         }}
       />
-      <Fab onPress={() => router.push('/location/new')} />
+      <Fab onPress={() => router.push('/location/new')} accessibilityLabel="Adicionar local" />
     </SafeAreaView>
   );
 }

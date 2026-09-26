@@ -1,10 +1,11 @@
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ColorPicker } from '../../src/components/ColorPicker';
 import { EmptyState } from '../../src/components/EmptyState';
 import { useStore } from '../../src/store/useStore';
 import { colors, locationPalette } from '../../src/theme';
+import { confirmAsync, showAlert } from '../../src/utils/dialog';
 
 export default function LocationForm() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -47,7 +48,7 @@ export default function LocationForm() {
 
   const canSave = name.trim().length > 0;
 
-  function handleSave() {
+  async function handleSave() {
     if (saving) return;
     const payload = { name: name.trim(), address: address.trim() || undefined, notes: notes.trim() || undefined, color };
 
@@ -57,56 +58,48 @@ export default function LocationForm() {
         return;
       }
       setSaving(true);
-      (async () => {
-        try {
-          await updateLocation(existing.id, payload);
-          router.back();
-        } catch (error) {
-          Alert.alert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
-        } finally {
-          setSaving(false);
-        }
-      })();
+      try {
+        await updateLocation(existing.id, payload);
+        router.back();
+      } catch (error) {
+        showAlert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
+      } finally {
+        setSaving(false);
+      }
       return;
     }
 
     setSaving(true);
-    Alert.alert(
+    const confirmed = await confirmAsync(
       'Confirmar novo local',
       `Adicionar "${payload.name}"${payload.address ? ` (${payload.address})` : ''} como local de estudo?`,
-      [
-        { text: 'Cancelar', style: 'cancel', onPress: () => setSaving(false) },
-        {
-          text: 'Adicionar',
-          onPress: () => {
-            addLocation(payload);
-            router.back();
-          },
-        },
-      ]
+      { confirmText: 'Adicionar' }
     );
+    if (!confirmed) {
+      setSaving(false);
+      return;
+    }
+    addLocation(payload);
+    router.back();
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!existing || saving) return;
-    Alert.alert('Excluir local', `Excluir "${existing.name}"? As atividades vinculadas ficarão sem local.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          setSaving(true);
-          try {
-            await deleteLocation(existing.id);
-            router.back();
-          } catch (error) {
-            Alert.alert('Não foi possível excluir', error instanceof Error ? error.message : 'Tente novamente.');
-          } finally {
-            setSaving(false);
-          }
-        },
-      },
-    ]);
+    const confirmed = await confirmAsync(
+      'Excluir local',
+      `Excluir "${existing.name}"? As atividades vinculadas ficarão sem local.`,
+      { confirmText: 'Excluir', destructive: true }
+    );
+    if (!confirmed) return;
+    setSaving(true);
+    try {
+      await deleteLocation(existing.id);
+      router.back();
+    } catch (error) {
+      showAlert('Não foi possível excluir', error instanceof Error ? error.message : 'Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

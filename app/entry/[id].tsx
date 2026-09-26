@@ -1,7 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { EmptyState } from '../../src/components/EmptyState';
 import { describeReminderPlan } from '../../src/notifications';
 import { useStore } from '../../src/store/useStore';
@@ -17,6 +17,7 @@ import {
   todayISO,
   weekdayLong,
 } from '../../src/utils/date';
+import { confirmAsync, showAlert } from '../../src/utils/dialog';
 
 export default function EntryForm() {
   const params = useLocalSearchParams<{ id: string; date?: string; moduleId?: string }>();
@@ -72,14 +73,14 @@ export default function EntryForm() {
   const canSave = title.trim().length > 0;
   const sameDayTimeWarning = startDate === endDate && !!startTime && !!endTime && endTime < startTime;
 
-  function handleSave() {
+  async function handleSave() {
     if (saving) return;
     if (!isValidISODate(startDate) || !isValidISODate(endDate)) {
-      Alert.alert('Data inválida', 'Verifique as datas de início e fim.');
+      showAlert('Data inválida', 'Verifique as datas de início e fim.');
       return;
     }
     if ((startTime && !isValidTime(startTime)) || (endTime && !isValidTime(endTime))) {
-      Alert.alert('Horário inválido', 'Verifique os horários de início e fim.');
+      showAlert('Horário inválido', 'Verifique os horários de início e fim.');
       return;
     }
 
@@ -101,16 +102,14 @@ export default function EntryForm() {
         return;
       }
       setSaving(true);
-      (async () => {
-        try {
-          await updateEntry(existing.id, payload);
-          router.back();
-        } catch (error) {
-          Alert.alert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
-        } finally {
-          setSaving(false);
-        }
-      })();
+      try {
+        await updateEntry(existing.id, payload);
+        router.back();
+      } catch (error) {
+        showAlert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
+      } finally {
+        setSaving(false);
+      }
       return;
     }
 
@@ -124,45 +123,40 @@ export default function EntryForm() {
     );
     const reminderText = describeReminderPlan(profile, !!payload.startTime);
 
-    Alert.alert('Confirmar nova atividade', `${summaryLines.join('\n')}\n\n${reminderText}`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Criar atividade',
-        onPress: async () => {
-          setSaving(true);
-          try {
-            await addEntry(payload);
-            router.back();
-          } catch (error) {
-            Alert.alert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
-          } finally {
-            setSaving(false);
-          }
-        },
-      },
-    ]);
+    const confirmed = await confirmAsync(
+      'Confirmar nova atividade',
+      `${summaryLines.join('\n')}\n\n${reminderText}`,
+      { confirmText: 'Criar atividade' }
+    );
+    if (!confirmed) return;
+    setSaving(true);
+    try {
+      await addEntry(payload);
+      router.back();
+    } catch (error) {
+      showAlert('Não foi possível salvar', error instanceof Error ? error.message : 'Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!existing || saving) return;
-    Alert.alert('Excluir atividade', `Tem certeza que deseja excluir "${existing.title}"?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          setSaving(true);
-          try {
-            await deleteEntry(existing.id);
-            router.back();
-          } catch (error) {
-            Alert.alert('Não foi possível excluir', error instanceof Error ? error.message : 'Tente novamente.');
-          } finally {
-            setSaving(false);
-          }
-        },
-      },
-    ]);
+    const confirmed = await confirmAsync(
+      'Excluir atividade',
+      `Tem certeza que deseja excluir "${existing.title}"?`,
+      { confirmText: 'Excluir', destructive: true }
+    );
+    if (!confirmed) return;
+    setSaving(true);
+    try {
+      await deleteEntry(existing.id);
+      router.back();
+    } catch (error) {
+      showAlert('Não foi possível excluir', error instanceof Error ? error.message : 'Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

@@ -2,12 +2,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestNotificationPermission } from '../../src/notifications';
 import { useStore } from '../../src/store/useStore';
 import { colors } from '../../src/theme';
 import { combineDateAndTime, isValidTime, todayISO } from '../../src/utils/date';
+import { confirmAsync, showAlert } from '../../src/utils/dialog';
 
 const REMINDER_OPTIONS = [
   { label: 'Desativado', value: 0 },
@@ -52,7 +53,7 @@ export default function Profile() {
       source.copy(dest);
       await setProfile({ photoUri: dest.uri });
     } catch (error) {
-      Alert.alert('Não foi possível salvar a foto', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert('Não foi possível salvar a foto', error instanceof Error ? error.message : 'Tente novamente.');
     }
   }
 
@@ -64,26 +65,25 @@ export default function Profile() {
       }
       const granted = await requestNotificationPermission();
       if (!granted) {
-        Alert.alert(
+        showAlert(
           'Permissão negada',
           'Ative as notificações do app nas configurações do celular para receber lembretes.'
         );
       }
       await setProfile({ notificationsEnabled: granted });
     } catch (error) {
-      Alert.alert('Não foi possível atualizar', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert('Não foi possível atualizar', error instanceof Error ? error.message : 'Tente novamente.');
     }
   }
 
-  function confirmReset() {
-    Alert.alert(
+  async function confirmReset() {
+    const confirmed = await confirmAsync(
       'Limpar todos os dados',
       'Isso vai apagar seu perfil, locais, módulos e todas as atividades do cronograma. Essa ação não pode ser desfeita.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Limpar tudo', style: 'destructive', onPress: () => resetAllData() },
-      ]
+      { confirmText: 'Limpar tudo', destructive: true }
     );
+    if (!confirmed) return;
+    resetAllData();
   }
 
   return (

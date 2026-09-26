@@ -1,12 +1,13 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ColorPicker } from '../../src/components/ColorPicker';
 import { EmptyState } from '../../src/components/EmptyState';
 import { useStore } from '../../src/store/useStore';
 import { colors, locationPalette } from '../../src/theme';
 import { addDays, combineDateAndTime, formatDateFullPt, isValidISODate, toISODate, todayISO } from '../../src/utils/date';
+import { confirmAsync, showAlert } from '../../src/utils/dialog';
 
 export default function ModuleForm() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -51,10 +52,10 @@ export default function ModuleForm() {
 
   const canSave = name.trim().length > 0;
 
-  function handleSave() {
+  async function handleSave() {
     if (saving) return;
     if (!isValidISODate(startDate) || !isValidISODate(endDate)) {
-      Alert.alert('Data inválida', 'Verifique as datas de início e fim.');
+      showAlert('Data inválida', 'Verifique as datas de início e fim.');
       return;
     }
 
@@ -68,28 +69,29 @@ export default function ModuleForm() {
     }
 
     setSaving(true);
-    Alert.alert(
+    const confirmed = await confirmAsync(
       'Confirmar novo módulo',
       `Criar o módulo "${payload.name}" de ${formatDateFullPt(payload.startDate)} a ${formatDateFullPt(payload.endDate)}?`,
-      [
-        { text: 'Cancelar', style: 'cancel', onPress: () => setSaving(false) },
-        {
-          text: 'Criar módulo',
-          onPress: () => {
-            addModule(payload);
-            router.back();
-          },
-        },
-      ]
+      { confirmText: 'Criar módulo' }
     );
+    if (!confirmed) {
+      setSaving(false);
+      return;
+    }
+    addModule(payload);
+    router.back();
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!existing || saving) return;
-    Alert.alert('Excluir módulo', `Excluir "${existing.name}"? As atividades vinculadas ficarão sem módulo.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Excluir', style: 'destructive', onPress: () => { deleteModule(existing.id); router.back(); } },
-    ]);
+    const confirmed = await confirmAsync(
+      'Excluir módulo',
+      `Excluir "${existing.name}"? As atividades vinculadas ficarão sem módulo.`,
+      { confirmText: 'Excluir', destructive: true }
+    );
+    if (!confirmed) return;
+    deleteModule(existing.id);
+    router.back();
   }
 
   return (

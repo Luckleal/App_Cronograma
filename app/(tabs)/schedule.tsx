@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '../../src/components/EmptyState';
 import { EntryCard } from '../../src/components/EntryCard';
@@ -9,6 +9,7 @@ import { useStore } from '../../src/store/useStore';
 import { colors } from '../../src/theme';
 import { Module, ScheduleEntry } from '../../src/types';
 import { formatDatePt, isTodayISO, parseISODate, startOfWeekISO, weekdayShort } from '../../src/utils/date';
+import { showAlert } from '../../src/utils/dialog';
 import { exportEntriesAsCsv } from '../../src/utils/export';
 import { groupEntriesByWeek, sortEntries } from '../../src/utils/schedule';
 
@@ -99,7 +100,7 @@ export default function Schedule() {
     try {
       await exportEntriesAsCsv(entries, locations, modules);
     } catch (error) {
-      Alert.alert('Não foi possível exportar', error instanceof Error ? error.message : 'Tente novamente.');
+      showAlert('Não foi possível exportar', error instanceof Error ? error.message : 'Tente novamente.');
     } finally {
       setExporting(false);
     }

@@ -2,9 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 
-export function Fab({ onPress }: { onPress: () => void }) {
+export function Fab({ onPress, accessibilityLabel = 'Adicionar atividade' }: { onPress: () => void; accessibilityLabel?: string }) {
   return (
-    <Pressable style={styles.fab} onPress={onPress} accessibilityRole="button" accessibilityLabel="Adicionar atividade">
+    <Pressable style={styles.fab} onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel}>
       <Ionicons name="add" size={28} color="#FFFFFF" />
     </Pressable>
   );
