@@ -34,14 +34,17 @@ export default function EntryForm() {
   const deleteEntry = useStore((s) => s.deleteEntry);
 
   const existing = useMemo(() => entries.find((e) => e.id === params.id), [entries, params.id]);
+  const validParamDate = params.date && isValidISODate(params.date) ? params.date : undefined;
+  const validParamModuleId =
+    params.moduleId && modules.some((m) => m.id === params.moduleId) ? params.moduleId : undefined;
 
   const [title, setTitle] = useState(existing?.title ?? '');
-  const [startDate, setStartDate] = useState(existing?.startDate ?? params.date ?? todayISO());
-  const [endDate, setEndDate] = useState(existing?.endDate ?? params.date ?? todayISO());
+  const [startDate, setStartDate] = useState(existing?.startDate ?? validParamDate ?? todayISO());
+  const [endDate, setEndDate] = useState(existing?.endDate ?? validParamDate ?? todayISO());
   const [startTime, setStartTime] = useState(existing?.startTime);
   const [endTime, setEndTime] = useState(existing?.endTime);
   const [locationId, setLocationId] = useState(existing?.locationId);
-  const [moduleId, setModuleId] = useState(existing?.moduleId ?? params.moduleId);
+  const [moduleId, setModuleId] = useState(existing?.moduleId ?? validParamModuleId);
   const [notes, setNotes] = useState(existing?.notes ?? '');
   const [saving, setSaving] = useState(false);
 

@@ -26,7 +26,42 @@ export default function Profile() {
   const [course, setCourse] = useState(profile.course);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
+  function deleteLocalPhotoFile(uri: string | undefined) {
+    if (!uri || !uri.startsWith('file://') || !uri.startsWith(Paths.document.uri)) return;
+    try {
+      new File(uri).delete();
+    } catch {
+      // arquivo já pode ter sido removido; ignorar
+    }
+  }
+
+  async function resizeImageForWeb(uri: string, maxDim = 480, quality = 0.7): Promise<string> {
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Não foi possível carregar a imagem.'));
+        img.src = uri;
+      });
+      const scale = Math.min(1, maxDim / Math.max(image.width, image.height));
+      const width = Math.round(image.width * scale) || 1;
+      const height = Math.round(image.height * scale) || 1;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas não suportado neste navegador.');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(image, 0, 0, width, height);
+      return canvas.toDataURL('image/jpeg', quality);
+    } finally {
+      URL.revokeObjectURL(uri);
+    }
+  }
+
   async function pickPhoto() {
+    let dest: File | undefined;
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
@@ -36,23 +71,20 @@ export default function Profile() {
       });
       if (result.canceled || !result.assets[0]) return;
       const uri = result.assets[0].uri;
+      const previousPhotoUri = profile.photoUri;
       if (Platform.OS === 'web') {
-        const blob = await (await fetch(uri)).blob();
-        const dataUri = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        URL.revokeObjectURL(uri);
+        const dataUri = await resizeImageForWeb(uri);
         await setProfile({ photoUri: dataUri });
+        deleteLocalPhotoFile(previousPhotoUri);
         return;
       }
       const source = new File(uri);
-      const dest = new File(Paths.document, `profile-${Date.now()}${source.extension || '.jpg'}`);
+      dest = new File(Paths.document, `profile-${Date.now()}${source.extension || '.jpg'}`);
       source.copy(dest);
       await setProfile({ photoUri: dest.uri });
+      deleteLocalPhotoFile(previousPhotoUri);
     } catch (error) {
+      deleteLocalPhotoFile(dest?.uri);
       showAlert('Não foi possível salvar a foto', error instanceof Error ? error.message : 'Tente novamente.');
     }
   }

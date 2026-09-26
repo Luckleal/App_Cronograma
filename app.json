@@ -37,7 +37,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "O app usa suas fotos para definir a imagem do seu perfil."
+          "photosPermission": "O app usa suas fotos para definir a imagem do seu perfil.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ]
     ],
